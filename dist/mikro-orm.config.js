@@ -15,6 +15,6 @@ exports.default = {
     entities: [Post_1.Post, User_1.User],
     dbName: 'oredit',
     type: 'postgresql',
-    debug: !constants_1.__prod__
+    debug: !constants_1.__prod__,
 };
 //# sourceMappingURL=mikro-orm.config.js.map

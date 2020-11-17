@@ -83,8 +83,8 @@ let UserResolver = class UserResolver {
                 return {
                     errors: [
                         {
-                            field: "username",
-                            message: "Username is too short, must be greater than 2"
+                            field: 'username',
+                            message: 'Username is too short, must be greater than 2',
                         },
                     ],
                 };
@@ -93,29 +93,42 @@ let UserResolver = class UserResolver {
                 return {
                     errors: [
                         {
-                            field: "password",
-                            message: "Username is too short, must be greater than 2"
+                            field: 'password',
+                            message: 'Password is too short, must be greater than 2',
                         },
                     ],
                 };
             }
             const hashedPassword = yield argon2_1.default.hash(options.password);
-            const user = em.create(User_1.User, { username: options.username, password: hashedPassword });
+            let user;
             try {
-                yield em.persistAndFlush(user);
+                const result = yield em
+                    .createQueryBuilder(User_1.User)
+                    .getKnexQuery()
+                    .insert({
+                    username: options.username,
+                    password: hashedPassword,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                })
+                    .returning('*');
+                user = result[0];
+                console.log('UserResolver -> @Ctx -> user', user);
+                console.log('UserResolver -> @Ctx -> result', result);
             }
             catch (error) {
-                if (error.code === "23505" || error.detail.includes("already exists")) {
+                console.log(error);
+                if (error.code === '23505') {
                     return {
                         errors: [
                             {
-                                field: "username",
-                                message: "username already taken"
-                            }
-                        ]
+                                field: 'username',
+                                message: 'username already taken',
+                            },
+                        ],
                     };
                 }
-                console.log("message: ", error.message);
+                console.log('message: ', error.message);
             }
             req.session.userId = user.id;
             return { user };
@@ -128,8 +141,8 @@ let UserResolver = class UserResolver {
                 return {
                     errors: [
                         {
-                            field: "username",
-                            message: "That username does not exist"
+                            field: 'username',
+                            message: 'That username does not exist',
                         },
                     ],
                 };
@@ -139,8 +152,8 @@ let UserResolver = class UserResolver {
                 return {
                     errors: [
                         {
-                            field: "password",
-                            message: "Incorrect Password"
+                            field: 'password',
+                            message: 'Incorrect Password',
                         },
                     ],
                 };
